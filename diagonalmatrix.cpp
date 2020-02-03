@@ -27,6 +27,16 @@ public:
        matrix.reserve(rows); 
     }
     
+    //in this constructor, only one dimension is used to instantiate the matrix
+    //it's implied that the other dimension is equal to this dimension
+    SquareDiagonalMatrix (int dimension)
+    {
+        //dimension must be greater than zero
+        assert(dimension>0);
+
+        matrix.reserve(dimension);
+    }
+    
     
     int getElement (int row, int column)
     {   
@@ -86,7 +96,20 @@ int main ()
     {
         std::cerr << e.what() << '\n';
     }
-    
+
+    std::cout << "--------------\n";
+    SquareDiagonalMatrix dm2 (10);
+    try
+    {
+    dm2.setElement(1, 50);
+    std::cout << dm2.getElement(1) << std::endl;
+    std::cout << dm2.getElement(9) << std::endl;
+    std::cout << dm2.getElement(12, 12) << std::endl;
+    }
+    catch(std::out_of_range& e)
+    {
+        std::cerr << e.what() << '\n';
+    }    
 
     return 0;
 }
