@@ -5,6 +5,7 @@
 #include<stdexcept>
 #include<cassert>
 
+
 class LowerTriangularMatrix
 {
 private:
@@ -85,11 +86,31 @@ public:
         }
     }
 
+    void showMatrix ()
+    {
+        for (int i = 1; i <= matrixDimension; i++)
+        {
+            for (int j = 1; j <= matrixDimension; j++)
+            {
+                if (i >= j) 
+                {
+                    std::cout << matrix[i * (i-1)/2+j-1] << " ";
+                }
+                else
+                {
+                    std::cout << "0 ";
+                }
+            }
+            std::cout << '\n';    
+        }
+    }
+
+
 };
 
 int main ()
 {
-    LowerTriangularMatrix ltm1 (10);
+    LowerTriangularMatrix ltm1 (7);
 
     try
     {
@@ -103,6 +124,35 @@ int main ()
     {
         std::cerr << e.what() << '\n';
     }
+    
+    std::cout << "----------------------------\n\n";
+    LowerTriangularMatrix ltm2 (5);
+    try
+    {
+        ltm2.setElement(1,1,3);
+        ltm2.setElement(2,1,2);
+        ltm2.setElement(2,2,3);
+        ltm2.setElement(3,1,4);
+        ltm2.setElement(3,2,1);
+        ltm2.setElement(3,3,1);
+        ltm2.setElement(4,1,5);
+        ltm2.setElement(4,2,1);
+        ltm2.setElement(4,3,1);
+        ltm2.setElement(4,4,1);
+        ltm2.setElement(5,1,1);
+        ltm2.setElement(5,2,8);
+        ltm2.setElement(5,3,1);
+        ltm2.setElement(5,4,1);
+        ltm2.setElement(5,5,7);
+    }
+    catch(const std::exception& e)
+    {
+        
+        std::cerr << e.what() << '\n';
+    }
+    
+    std::cout << "new matrix: " << '\n';
+    ltm2.showMatrix();
     
 
     return 0;
