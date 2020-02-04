@@ -75,14 +75,31 @@ public:
         matrix[row-1] = value; 
     } 
 
+    void showMatrix ()
+    {
+        for (int i = 0; i < matrix.capacity(); i++)
+        {
+            for (int j = 0; j < matrix.capacity(); j++)
+            {
+                if (i==j)
+                {
+                    std::cout << matrix[i] << " ";
+                } 
+                else
+                {
+                    std::cout << "0 ";
+                }
+                
+            }
+            std::cout << std::endl;
+        }
+    }
+
 };
 
 int main ()
 {
-    
-    
     SquareDiagonalMatrix dm1(10, 10);
-    
     
     
     try
@@ -98,18 +115,21 @@ int main ()
     }
 
     std::cout << "--------------\n";
-    SquareDiagonalMatrix dm2 (10);
+    SquareDiagonalMatrix dm2 (5);
     try
     {
-    dm2.setElement(1, 50);
-    std::cout << dm2.getElement(1) << std::endl;
-    std::cout << dm2.getElement(9) << std::endl;
-    std::cout << dm2.getElement(12, 12) << std::endl;
+    dm2.setElement(1, 5);
+    dm2.setElement(2, 7);
+    dm2.setElement(3, 4);
+    dm2.setElement(4, 5);
+    dm2.setElement(5, 7);
     }
     catch(std::out_of_range& e)
     {
         std::cerr << e.what() << '\n';
-    }    
+    }  
+
+    dm2.showMatrix();  
 
     return 0;
 }
