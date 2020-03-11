@@ -29,7 +29,7 @@ public:
     
     //in this constructor, only one dimension is used to instantiate the matrix
     //it's implied that the other dimension is equal to this dimension
-    SquareDiagonalMatrix (int dimension)
+    explicit SquareDiagonalMatrix (int dimension)
     {
         //dimension must be greater than zero
         assert(dimension>0);
