@@ -1,7 +1,9 @@
 //Sparse matrix representation with C++
+
 #include<iostream>
 #include<stdexcept>
 #include<cstdlib>
+#include<optional>
 
 
 //this class uses so-calles three column sparse matrix representation 
@@ -23,7 +25,7 @@ public:
 
     int getNumberOfNotZeros() const;
 
-    //this function prints the matrix in the console
+    //this function prints the matrix to the console
     //the time complexity of this function is O(n^3)
     void showMatrix() const;
 
@@ -83,7 +85,7 @@ struct SparseMatrix::Element
 {
     int rowNumber;
     int columnNumber;
-    int value;
+    std::optional<int> value;
 };
 
 SparseMatrix::SparseMatrix(): rows{0}, columns{0}, numberOfNotZeros{0}, arrayPointer{nullptr} {}
@@ -97,20 +99,21 @@ SparseMatrix::SparseMatrix(int rows, int columns, int elementNumber)
     this->columns = columns;
     numberOfNotZeros = elementNumber;
     arrayPointer = new Element [numberOfNotZeros];
-    int i = 0; 
+    int i, j;
+    i = 0; 
     bool appropriateRecord;
     if(numberOfNotZeros > 0)
     {
         std::cout << "Please enter the " << numberOfNotZeros << " element" << (numberOfNotZeros > 1 ? "s" : "") << std::endl;
         std::cout << "The values of the row number, column number and the element's value must be separated by an empty space" << std::endl;
         
-        while( i != (numberOfNotZeros))
+        while( i != numberOfNotZeros)
         {
             appropriateRecord = true;
             std::cout << i+1 << "s" << " element: ";
             if(std::cin.good())
             {
-                std::cin >> arrayPointer[i].rowNumber >> arrayPointer[i].columnNumber >> arrayPointer[i].value;
+                std::cin >> arrayPointer[i].rowNumber >> arrayPointer[i].columnNumber >> *arrayPointer[i].value;
                 if((arrayPointer[i].rowNumber > (rows - 1)) || arrayPointer[i].columnNumber > (columns - 1) ||
                    (arrayPointer[i].rowNumber < 0) || (arrayPointer[i].columnNumber < 0))
                 {
@@ -118,14 +121,27 @@ SparseMatrix::SparseMatrix(int rows, int columns, int elementNumber)
                     std::cout << "Please enter the values correctly" << std::endl;
                     appropriateRecord = false;
                 }
+
+
             }   
             else
             {
                 std::cout << "Sorry, for some reason the input isn't working properly" << std::endl;
                 exit(1);
             }
+            
+            if(appropriateRecord)
+            {
+                i = 0;
+                for(j = 0; j<numberOfNotZeros; j++)
+                {
+                    if(*arrayPointer[j].value)
+                    {
+                        i++;
+                    }
 
-            if(appropriateRecord) i++;     
+                }
+            }    
         } 
 
         std::cout << "The not zero elements have just been included to the matrix" << std::endl;  
@@ -151,7 +167,7 @@ void SparseMatrix::showMatrix() const
             {
                 if(arrayPointer[k].rowNumber == i && arrayPointer[k].columnNumber == j)
                 {
-                    std::cout << arrayPointer[k].value << " ";
+                    std::cout << *arrayPointer[k].value << " ";
                     flag = false;
                     break;
                 }
@@ -182,13 +198,16 @@ SparseMatrix SparseMatrix::operator-(const SparseMatrix& other) const
     if(count == (numberOfNotZeros + other.numberOfNotZeros))
     {
         for(i = 0; i<numberOfNotZeros; i++)
+        {
             result.arrayPointer[i] = arrayPointer[i];
-
+            *result.arrayPointer[i].value = *arrayPointer[i].value;
+        }
+            
         for(i = numberOfNotZeros, j = 0; i<count; i++, j++)
-            {
-                result.arrayPointer[i] = other.arrayPointer[j];
-                result.arrayPointer[i].value = 0 - other.arrayPointer[j].value;
-            }
+        {
+            result.arrayPointer[i] = other.arrayPointer[j];
+            *result.arrayPointer[i].value = 0 - *other.arrayPointer[j].value;
+        }
 
         return result;
     }    
@@ -204,7 +223,7 @@ SparseMatrix SparseMatrix::operator-(const SparseMatrix& other) const
                (arrayPointer[i].columnNumber == other.arrayPointer[j].columnNumber))
             {
                 result.arrayPointer[i] = arrayPointer[i];
-                result.arrayPointer[i].value = arrayPointer[i].value - other.arrayPointer[i].value;
+                *result.arrayPointer[i].value = *arrayPointer[i].value - *other.arrayPointer[i].value;
                 match = true;
                 break;
             }
@@ -224,7 +243,7 @@ SparseMatrix SparseMatrix::operator-(const SparseMatrix& other) const
                (result.arrayPointer[i].columnNumber != other.arrayPointer[j].columnNumber))
             {
                 result.arrayPointer[t] = other.arrayPointer[j];
-                result.arrayPointer[t].value = 0 - other.arrayPointer[j].value;
+                *result.arrayPointer[t].value = 0 - *other.arrayPointer[j].value;
             }
         }
     } 
@@ -250,10 +269,17 @@ SparseMatrix SparseMatrix::operator+(const SparseMatrix& other) const
     if(count == (numberOfNotZeros + other.numberOfNotZeros))
     {
         for(i = 0; i<numberOfNotZeros; i++)
+        {
             result.arrayPointer[i] = arrayPointer[i];
+            *result.arrayPointer[i].value = *arrayPointer[i].value;
+        }
 
         for(i = numberOfNotZeros, j = 0; i<count; i++, j++)
+        {
             result.arrayPointer[i] = other.arrayPointer[j];
+            *result.arrayPointer[i].value = *other.arrayPointer[j].value;
+        }
+            
 
         return result;
     }    
@@ -269,7 +295,7 @@ SparseMatrix SparseMatrix::operator+(const SparseMatrix& other) const
                (arrayPointer[i].columnNumber == other.arrayPointer[j].columnNumber))
             {
                 result.arrayPointer[i] = arrayPointer[i];
-                result.arrayPointer[i].value = arrayPointer[i].value + other.arrayPointer[i].value;
+                *result.arrayPointer[i].value = *arrayPointer[i].value + *other.arrayPointer[i].value;
                 match = true;
                 break;
             }
