@@ -91,13 +91,14 @@ SparseMatrix::SparseMatrix(): rows{0}, columns{0}, numberOfNotZeros{0}, arrayPoi
 SparseMatrix::SparseMatrix(int rows, int columns, int elementNumber)
 {
     if(elementNumber > (rows * columns))
-        throw std::invalid_argument("The number of elements (third argument) must not be greater than the product of rows * columns");
+        throw std::invalid_argument("The number of elements (third argument) must not be greater than the product of the rows and columns");
 
     this->rows = rows;
     this->columns = columns;
     numberOfNotZeros = elementNumber;
     arrayPointer = new Element [numberOfNotZeros];
     int i = 0; 
+    bool appropriateRecord;
     if(numberOfNotZeros > 0)
     {
         std::cout << "Please enter the " << numberOfNotZeros << " element" << (numberOfNotZeros > 1 ? "s" : "") << std::endl;
@@ -105,19 +106,29 @@ SparseMatrix::SparseMatrix(int rows, int columns, int elementNumber)
         
         while( i != (numberOfNotZeros))
         {
+            appropriateRecord = true;
             std::cout << i+1 << "s" << " element: ";
             if(std::cin.good())
-               std::cin >> arrayPointer[i].rowNumber >> arrayPointer[i].columnNumber >> arrayPointer[i].value;
+            {
+                std::cin >> arrayPointer[i].rowNumber >> arrayPointer[i].columnNumber >> arrayPointer[i].value;
+                if((arrayPointer[i].rowNumber > (rows - 1)) || arrayPointer[i].columnNumber > (columns - 1) ||
+                   (arrayPointer[i].rowNumber < 0) || (arrayPointer[i].columnNumber < 0))
+                {
+                    std::cout << "You entered an inappropriate row number or/and column number\n";
+                    std::cout << "Please enter the values correctly" << std::endl;
+                    appropriateRecord = false;
+                }
+            }   
             else
             {
                 std::cout << "Sorry, for some reason the input isn't working properly" << std::endl;
                 exit(1);
             }
-                
-            i++;
+
+            if(appropriateRecord) i++;     
         } 
 
-        std::cout << "All the not elements have just been included to the matrix" << std::endl;  
+        std::cout << "The not zero elements have just been included to the matrix" << std::endl;  
     }
 }
 
