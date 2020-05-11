@@ -341,5 +341,17 @@ int SparseMatrix::getNumberOfNotZeros() const
     return numberOfNotZeros;
 }
 
+std::vector<std::tuple<int, int, int>> SparseMatrix::getMatrixElements() const 
+{
+    std::vector<std::tuple<int, int, int>> vec (numberOfNotZeros);
+    std::tuple<int, int, int> tup;
+    for(int i=0; i<numberOfNotZeros; i++)
+    {
+        auto[a, b, c] = arrayPointer[i];
+        tup = std::make_tuple(a, b, c);
+        vec.push_back(tup);
+    }   
+}
+
 
 
