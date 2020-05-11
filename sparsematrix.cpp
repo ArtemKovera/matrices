@@ -3,8 +3,8 @@
 #include<iostream>
 #include<stdexcept>
 #include<cstdlib>
-#include<optional>
-
+#include<vector>
+#include<tuple>
 
 //this class uses so-calles three column sparse matrix representation 
 //this way of sparse matrix representation allows saving space
@@ -13,14 +13,18 @@ class SparseMatrix
 public:
     //this constructor creates a matrix using three column sparse matrix representation
     //the constructor takes 3 arguments: number of rows, number of columns, and number of not zero elements 
-    //it throws invalid_argument exeption if the third argument is greater than the product of the two other arguments
+    //if the third argument is greater than the product of the two other arguments, the program terminates
     SparseMatrix(int, int, int);
 
     //default constructot sets number of rows, number of columns, and number of not zero elements to zero
     SparseMatrix();
 
+    //if the dimensions of the argument matrix differs from the caller matrix, 
+    //the invalid_argument exception is thrown
     SparseMatrix operator+(const SparseMatrix&) const;
 
+    //if the dimensions of the argument matrix differs from the caller matrix, 
+    //the invalid_argument exception is thrown
     SparseMatrix operator-(const SparseMatrix&) const;
 
     int getNumberOfNotZeros() const;
@@ -29,6 +33,13 @@ public:
     //the time complexity of this function is O(n^3)
     void showMatrix() const;
 
+    int getRows() const;
+
+    int getColumns() const;
+
+    int getTotalNumberOfElements() const;
+
+    std::vector<std::tuple<int, int, int>> getMatrixElements () const;
 
 private:
     struct Element;
@@ -41,43 +52,24 @@ private:
     void clear(Element*);
 
     //helper function which is used in + and - operator overloads
-    int combinedNumberOfNotZeros(const SparseMatrix&, const SparseMatrix&) const;
+    int combinedNumberOfNotZeros(const SparseMatrix&, const SparseMatrix&) const; 
 
 };
 
-
-
-
 int main ()
 {
-    SparseMatrix sm1(10, 10, 3);
-
-    //std::cout<<"There are "<<sm1.getNumberOfNotZeros()<<" not zero matrix elements"<<std::endl;
-
-    std::cout<<std::endl;
-
-    std::cout<<"Matrix sm1: " << std::endl;
+    SparseMatrix sm1(10, 10, 4);
+    std::cout << "Matrix sm1: \n";
     sm1.showMatrix();
-
     std::cout<<std::endl;
-    SparseMatrix sm2(10, 10, 2);
-    std::cout<<"Matrix sm2: " << std::endl;
+
+    SparseMatrix sm2(10, 10, 3);
+    std::cout << "Matrix sm2: \n";
     sm2.showMatrix();
     std::cout<<std::endl;
 
-    SparseMatrix sm3 = sm1 + sm2;
 
-    std::cout<<"Matrix sm3: " << std::endl;
-    sm3.showMatrix();
-    std::cout<<"There are "<<sm3.getNumberOfNotZeros()<<" not zero matrix elements in sm3"<<std::endl;
 
-    std::cout<<std::endl;
-    SparseMatrix sm4 = sm1 - sm2;
-    std::cout<<"Matrix sm4: " << std::endl;
-    sm4.showMatrix();
-    std::cout<<"There are "<<sm4.getNumberOfNotZeros()<<" not zero matrix elements in sm4"<<std::endl;
-
-    std::cout<<std::endl;
     return 0;
 }
 
@@ -85,7 +77,7 @@ struct SparseMatrix::Element
 {
     int rowNumber;
     int columnNumber;
-    std::optional<int> value;
+    int value;
 };
 
 SparseMatrix::SparseMatrix(): rows{0}, columns{0}, numberOfNotZeros{0}, arrayPointer{nullptr} {}
@@ -93,8 +85,10 @@ SparseMatrix::SparseMatrix(): rows{0}, columns{0}, numberOfNotZeros{0}, arrayPoi
 SparseMatrix::SparseMatrix(int rows, int columns, int elementNumber)
 {
     if(elementNumber > (rows * columns))
-        throw std::invalid_argument("The number of elements (third argument) must not be greater than the product of the rows and columns");
-
+    {
+        std::cout<<"The number of elements (third argument) must not be greater than the product of the rows and columns"<<std::endl;
+        exit(1); 
+    }
     this->rows = rows;
     this->columns = columns;
     numberOfNotZeros = elementNumber;
@@ -102,18 +96,19 @@ SparseMatrix::SparseMatrix(int rows, int columns, int elementNumber)
     int i, j;
     i = 0; 
     bool appropriateRecord;
+
     if(numberOfNotZeros > 0)
     {
         std::cout << "Please enter the " << numberOfNotZeros << " element" << (numberOfNotZeros > 1 ? "s" : "") << std::endl;
         std::cout << "The values of the row number, column number and the element's value must be separated by an empty space" << std::endl;
-        
-        while( i != numberOfNotZeros)
+        while(i<numberOfNotZeros)
         {
             appropriateRecord = true;
             std::cout << i+1 << "s" << " element: ";
             if(std::cin.good())
             {
-                std::cin >> arrayPointer[i].rowNumber >> arrayPointer[i].columnNumber >> *arrayPointer[i].value;
+                
+                std::cin >> arrayPointer[i].rowNumber >> arrayPointer[i].columnNumber >> arrayPointer[i].value;
                 if((arrayPointer[i].rowNumber > (rows - 1)) || arrayPointer[i].columnNumber > (columns - 1) ||
                    (arrayPointer[i].rowNumber < 0) || (arrayPointer[i].columnNumber < 0))
                 {
@@ -121,36 +116,33 @@ SparseMatrix::SparseMatrix(int rows, int columns, int elementNumber)
                     std::cout << "Please enter the values correctly" << std::endl;
                     appropriateRecord = false;
                 }
+                else if (i != 0)
+                {   
+                    for(int k = i - 1; k != -1; k--)
+                    {
+                        if((arrayPointer[i].rowNumber == arrayPointer[k].rowNumber) &&
+                        (arrayPointer[i].columnNumber == arrayPointer[k].columnNumber))
+                        {
+                            appropriateRecord = false;
+                            std::cout<<"This element has been already entered"<<std::endl;
+                            break;
+                        }                        
+                    }
 
-
-            }   
+                } 
+            }  
             else
             {
                 std::cout << "Sorry, for some reason the input isn't working properly" << std::endl;
                 exit(1);
             }
-            
+
             if(appropriateRecord)
             {
-                i = 0;
-                for(j = 0; j<numberOfNotZeros; j++)
-                {
-                    if(*arrayPointer[j].value)
-                    {
-                        i++;
-                    }
-
-                }
-            }    
-        } 
-
-        std::cout << "The not zero elements have just been included to the matrix" << std::endl;  
+                i++;
+            }            
+        }
     }
-}
-
-int SparseMatrix::getNumberOfNotZeros() const
-{
-    return numberOfNotZeros;
 }
 
 void SparseMatrix::showMatrix() const
@@ -167,7 +159,7 @@ void SparseMatrix::showMatrix() const
             {
                 if(arrayPointer[k].rowNumber == i && arrayPointer[k].columnNumber == j)
                 {
-                    std::cout << *arrayPointer[k].value << " ";
+                    std::cout << arrayPointer[k].value << " ";
                     flag = false;
                     break;
                 }
@@ -199,14 +191,16 @@ SparseMatrix SparseMatrix::operator-(const SparseMatrix& other) const
     {
         for(i = 0; i<numberOfNotZeros; i++)
         {
-            result.arrayPointer[i] = arrayPointer[i];
-            *result.arrayPointer[i].value = *arrayPointer[i].value;
+            result.arrayPointer[i].rowNumber = arrayPointer[i].rowNumber;
+            result.arrayPointer[i].columnNumber = arrayPointer[i].columnNumber;
+            result.arrayPointer[i].value = arrayPointer[i].value;
         }
             
         for(i = numberOfNotZeros, j = 0; i<count; i++, j++)
         {
-            result.arrayPointer[i] = other.arrayPointer[j];
-            *result.arrayPointer[i].value = 0 - *other.arrayPointer[j].value;
+            result.arrayPointer[i].rowNumber = other.arrayPointer[j].rowNumber;
+            result.arrayPointer[i].columnNumber = other.arrayPointer[j].columnNumber;
+            result.arrayPointer[i].value = 0 - other.arrayPointer[j].value;
         }
 
         return result;
@@ -222,8 +216,9 @@ SparseMatrix SparseMatrix::operator-(const SparseMatrix& other) const
             if((arrayPointer[i].rowNumber == other.arrayPointer[j].rowNumber) &&
                (arrayPointer[i].columnNumber == other.arrayPointer[j].columnNumber))
             {
-                result.arrayPointer[i] = arrayPointer[i];
-                *result.arrayPointer[i].value = *arrayPointer[i].value - *other.arrayPointer[i].value;
+                result.arrayPointer[i].rowNumber = arrayPointer[i].rowNumber;
+                result.arrayPointer[i].columnNumber = arrayPointer[i].columnNumber;
+                result.arrayPointer[i].value = arrayPointer[i].value - other.arrayPointer[i].value;
                 match = true;
                 break;
             }
@@ -231,7 +226,9 @@ SparseMatrix SparseMatrix::operator-(const SparseMatrix& other) const
         }
         if(!match)
         {
-            result.arrayPointer[i] = arrayPointer[i];
+            result.arrayPointer[i].rowNumber = arrayPointer[i].rowNumber;
+            result.arrayPointer[i].columnNumber = arrayPointer[i].columnNumber;
+            result.arrayPointer[i].value = arrayPointer[i].value;
         }
     }
 
@@ -242,8 +239,9 @@ SparseMatrix SparseMatrix::operator-(const SparseMatrix& other) const
             if((result.arrayPointer[i].rowNumber != other.arrayPointer[j].rowNumber) || 
                (result.arrayPointer[i].columnNumber != other.arrayPointer[j].columnNumber))
             {
-                result.arrayPointer[t] = other.arrayPointer[j];
-                *result.arrayPointer[t].value = 0 - *other.arrayPointer[j].value;
+                result.arrayPointer[t].rowNumber = other.arrayPointer[j].rowNumber;
+                result.arrayPointer[t].columnNumber = other.arrayPointer[j].columnNumber;
+                result.arrayPointer[t].value = 0 - other.arrayPointer[j].value;
             }
         }
     } 
@@ -271,16 +269,13 @@ SparseMatrix SparseMatrix::operator+(const SparseMatrix& other) const
         for(i = 0; i<numberOfNotZeros; i++)
         {
             result.arrayPointer[i] = arrayPointer[i];
-            *result.arrayPointer[i].value = *arrayPointer[i].value;
         }
 
         for(i = numberOfNotZeros, j = 0; i<count; i++, j++)
         {
             result.arrayPointer[i] = other.arrayPointer[j];
-            *result.arrayPointer[i].value = *other.arrayPointer[j].value;
         }
             
-
         return result;
     }    
     
@@ -295,12 +290,12 @@ SparseMatrix SparseMatrix::operator+(const SparseMatrix& other) const
                (arrayPointer[i].columnNumber == other.arrayPointer[j].columnNumber))
             {
                 result.arrayPointer[i] = arrayPointer[i];
-                *result.arrayPointer[i].value = *arrayPointer[i].value + *other.arrayPointer[i].value;
+                result.arrayPointer[i].value = arrayPointer[i].value + other.arrayPointer[i].value;
                 match = true;
                 break;
             }
-
         }
+
         if(!match)
         {
             result.arrayPointer[i] = arrayPointer[i];
@@ -337,7 +332,13 @@ int SparseMatrix::combinedNumberOfNotZeros(const SparseMatrix& src1, const Spars
                }
         }
     }
+
     return count;
+}
+
+int SparseMatrix::getNumberOfNotZeros() const
+{
+    return numberOfNotZeros;
 }
 
 
