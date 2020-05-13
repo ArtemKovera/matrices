@@ -39,7 +39,7 @@ public:
 
     int getTotalNumberOfElements() const;
 
-    std::vector<std::tuple<int, int, int>> getMatrixElements () const;
+    std::vector<std::tuple<int, int, int>> getElements () const;
 
 private:
     struct Element;
@@ -68,8 +68,21 @@ int main ()
     sm2.showMatrix();
     std::cout<<std::endl;
 
+    SparseMatrix sm3 = sm1 + sm2;
+    std::cout << "Matrix sm3: \n";
+    sm3.showMatrix();
+    std::cout<<std::endl;   
 
-
+    
+    std::vector<std::tuple<int, int, int>> vec;
+    
+    vec = sm3.getElements();
+    std::cout << "sm3 elements: \n";
+    for(auto e: vec)
+    {
+        std::cout<<std::get<0>(e)<<" "<<std::get<1>(e)<<" "<<std::get<2>(e)<<std::endl;
+    } 
+    
     return 0;
 }
 
@@ -317,6 +330,72 @@ SparseMatrix SparseMatrix::operator+(const SparseMatrix& other) const
     return result;
 }
 
+/*
+SparseMatrix SparseMatrix::operator+(const SparseMatrix& other) const
+{
+    if((rows != other.rows) || (columns != other.columns))
+        throw std::invalid_argument("The dimensions of both matrices must be the same");
+
+    SparseMatrix result;
+    result.rows = rows;
+    result.columns = columns;
+    int count = combinedNumberOfNotZeros(*this, other);
+    int i, j, k, t;
+
+    result.numberOfNotZeros = count;
+    result.arrayPointer = new Element [count];
+
+
+    if(count == (numberOfNotZeros + other.numberOfNotZeros))
+    {
+        for(i = 0; i<numberOfNotZeros; i++)
+            result.arrayPointer[i] = arrayPointer[i];
+
+        for(i = numberOfNotZeros, j = 0; i<count; i++, j++)
+            result.arrayPointer[i] = other.arrayPointer[j];
+
+        return result;
+    }    
+
+    bool match;
+
+    for(i=0; i<numberOfNotZeros; i++)
+    {
+        match = false;
+        for(j=0; j<other.numberOfNotZeros; j++)
+        {
+            if((arrayPointer[i].rowNumber == other.arrayPointer[j].rowNumber) &&
+               (arrayPointer[i].columnNumber == other.arrayPointer[j].columnNumber))
+            {
+                result.arrayPointer[i] = arrayPointer[i];
+                result.arrayPointer[i].value = arrayPointer[i].value + other.arrayPointer[i].value;
+                match = true;
+                break;
+            }
+
+        }
+        if(!match)
+        {
+            result.arrayPointer[i] = arrayPointer[i];
+        }
+    }
+
+    for(i = 0; i<numberOfNotZeros; i++)
+    {
+        for(j = 0, t = numberOfNotZeros; j<other.numberOfNotZeros; j++, t++)
+        {
+            if((result.arrayPointer[i].rowNumber != other.arrayPointer[j].rowNumber) || 
+               (result.arrayPointer[i].columnNumber != other.arrayPointer[j].columnNumber))
+            {
+                result.arrayPointer[t] = other.arrayPointer[j];
+            }
+        }
+    } 
+
+    return result;
+}
+*/
+
 int SparseMatrix::combinedNumberOfNotZeros(const SparseMatrix& src1, const SparseMatrix& src2) const
 {
     int i, j, count;
@@ -341,16 +420,18 @@ int SparseMatrix::getNumberOfNotZeros() const
     return numberOfNotZeros;
 }
 
-std::vector<std::tuple<int, int, int>> SparseMatrix::getMatrixElements() const 
+std::vector<std::tuple<int, int, int>> SparseMatrix::getElements() const 
 {
-    std::vector<std::tuple<int, int, int>> vec (numberOfNotZeros);
+    std::vector<std::tuple<int, int, int>> vec;
+    vec.reserve(getNumberOfNotZeros());
     std::tuple<int, int, int> tup;
     for(int i=0; i<numberOfNotZeros; i++)
     {
         auto[a, b, c] = arrayPointer[i];
         tup = std::make_tuple(a, b, c);
         vec.push_back(tup);
-    }   
+    }
+    return vec;
 }
 
 
