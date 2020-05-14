@@ -19,6 +19,10 @@ public:
     //default constructot sets number of rows, number of columns, and number of not zero elements to zero
     SparseMatrix();
 
+    SparseMatrix(const SparseMatrix&);
+
+    //SparseMatrix& operator=(const SparseMatrix&);
+
     //if the dimensions of the argument matrix differs from the caller matrix, 
     //the invalid_argument exception is thrown
     SparseMatrix operator+(const SparseMatrix&) const;
@@ -68,19 +72,15 @@ int main ()
     sm2.showMatrix();
     std::cout<<std::endl;
      
-    /*
+    /* 
     SparseMatrix sm3 = sm1 + sm2;
     std::cout << "Matrix sm3: \n";
     sm3.showMatrix();
-   
-
-    
-    
     std::cout <<"Number of elements in sm3: " << sm3.getNumberOfNotZeros() << std::endl;    
     std::cout << std::endl;
     */
+
     SparseMatrix sm4 = sm1 - sm2;
-    
     std::cout << "Matrix sm4: \n";
     sm4.showMatrix();
     std::cout <<"Number of elements in sm4: " << sm4.getNumberOfNotZeros() << std::endl;
@@ -170,6 +170,17 @@ SparseMatrix::SparseMatrix(int rows, int columns, int elementNumber)
             }            
         }
     }
+}
+
+SparseMatrix::SparseMatrix(const SparseMatrix& src)
+{
+    rows = src.rows;
+    columns = src.columns;
+    numberOfNotZeros = src.numberOfNotZeros;
+    arrayPointer = new Element [numberOfNotZeros];
+
+    for(int i = 0; i<numberOfNotZeros; i++)
+        arrayPointer[i] = src.arrayPointer[i];
 }
 
 void SparseMatrix::showMatrix() const
