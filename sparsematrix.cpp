@@ -5,6 +5,8 @@
 #include<cstdlib>
 #include<vector>
 #include<tuple>
+#include<utility>
+
 
 //this class uses so-calles three column sparse matrix representation 
 //this way of sparse matrix representation allows saving space
@@ -21,7 +23,7 @@ public:
 
     SparseMatrix(const SparseMatrix&);
 
-    //SparseMatrix& operator=(const SparseMatrix&);
+    SparseMatrix& operator=(const SparseMatrix&);
 
     //if the dimensions of the argument matrix differs from the caller matrix, 
     //the invalid_argument exception is thrown
@@ -55,8 +57,11 @@ private:
 
     void clear(Element*);
 
-    //helper function which is used in + and - operator overloads
+    //helper method which is used in + and - operator overloads
     int combinedNumberOfNotZeros(const SparseMatrix&, const SparseMatrix&) const; 
+
+    //helper method which is used in assignment operator
+    void swap(SparseMatrix&, SparseMatrix&) noexcept;
 
 };
 
@@ -79,8 +84,9 @@ int main ()
     std::cout <<"Number of elements in sm3: " << sm3.getNumberOfNotZeros() << std::endl;    
     std::cout << std::endl;
     */
-
+    std::cout<<"////////////////////////////"<<std::endl;
     SparseMatrix sm4 = sm1 - sm2;
+    std::cout<<"///////////////////////////"<<std::endl;
     std::cout << "Matrix sm4: \n";
     sm4.showMatrix();
     std::cout <<"Number of elements in sm4: " << sm4.getNumberOfNotZeros() << std::endl;
@@ -174,6 +180,7 @@ SparseMatrix::SparseMatrix(int rows, int columns, int elementNumber)
 
 SparseMatrix::SparseMatrix(const SparseMatrix& src)
 {
+    std::cout<<"Copy constructor is called"<<std::endl;
     rows = src.rows;
     columns = src.columns;
     numberOfNotZeros = src.numberOfNotZeros;
@@ -181,6 +188,18 @@ SparseMatrix::SparseMatrix(const SparseMatrix& src)
 
     for(int i = 0; i<numberOfNotZeros; i++)
         arrayPointer[i] = src.arrayPointer[i];
+}
+
+SparseMatrix& SparseMatrix::operator=(const SparseMatrix& src)
+{
+    std::cout<<"Copy assignment operator is called"<<std::endl;
+    if(this == &src)
+        return *this;
+    
+    SparseMatrix temp(src);
+    swap(*this, temp);
+
+    return *this;
 }
 
 void SparseMatrix::showMatrix() const
@@ -390,6 +409,18 @@ std::vector<std::tuple<int, int, int>> SparseMatrix::getElements() const
     }
     return vec;
 }
+
+void SparseMatrix::swap(SparseMatrix& first, SparseMatrix& second) noexcept
+{
+    using std::swap;
+
+    swap(first.rows, second.rows);
+    swap(first.columns, second.columns);
+    swap(first.numberOfNotZeros, second.numberOfNotZeros);
+    swap(first.arrayPointer, second.arrayPointer);
+}
+
+
 
 
 
