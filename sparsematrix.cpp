@@ -25,6 +25,10 @@ public:
 
     SparseMatrix& operator=(const SparseMatrix&);
 
+    SparseMatrix(SparseMatrix&&) noexcept;
+
+    SparseMatrix& operator=(SparseMatrix&&) noexcept;
+
     //if the dimensions of the argument matrix differs from the caller matrix, 
     //the invalid_argument exception is thrown
     SparseMatrix operator+(const SparseMatrix&) const;
@@ -63,6 +67,9 @@ private:
     //helper method which is used in assignment operator
     void swap(SparseMatrix&, SparseMatrix&) noexcept;
 
+    void cleanup(Element*) noexcept;
+
+    void moveFrom(SparseMatrix&) noexcept; 
 };
 
 int main ()
@@ -91,11 +98,26 @@ int main ()
     sm4.showMatrix();
     std::cout <<"Number of elements in sm4: " << sm4.getNumberOfNotZeros() << std::endl;
     std::cout<<std::endl;  
+    
+    SparseMatrix sm5(std::move(sm4));
+    sm1 = std::move(sm5);
+    //SparseMatrix sm5 = sm4;
     /*  
+    std::vector<std::tuple<int, int, int>> vec;
+    vec = sm5.getElements();
+
+    
+    
+    std::cout << "sm5 elements: \n";
+    for(auto e: vec)
+    {
+        std::cout<<std::get<0>(e)<<" "<<std::get<1>(e)<<" "<<std::get<2>(e)<<std::endl;
+    }     
+    
     std::vector<std::tuple<int, int, int>> vec;
     vec = sm4.getElements();
 
-
+    
     
     std::cout << "sm3 elements: \n";
     for(auto e: vec)
@@ -199,6 +221,24 @@ SparseMatrix& SparseMatrix::operator=(const SparseMatrix& src)
     SparseMatrix temp(src);
     swap(*this, temp);
 
+    return *this;
+}
+
+SparseMatrix::SparseMatrix(SparseMatrix&& src) noexcept
+{
+    std::cout<<"Move constructor"<<std::endl;
+    moveFrom(src);
+}
+
+SparseMatrix& SparseMatrix::operator=(SparseMatrix&& src) noexcept
+{
+    std::cout<<"Move assignment operator is called"<<std::endl;
+    if(this == &src)
+        return *this;   
+
+    cleanup(arrayPointer);
+
+    moveFrom(src);
     return *this;
 }
 
@@ -418,6 +458,24 @@ void SparseMatrix::swap(SparseMatrix& first, SparseMatrix& second) noexcept
     swap(first.columns, second.columns);
     swap(first.numberOfNotZeros, second.numberOfNotZeros);
     swap(first.arrayPointer, second.arrayPointer);
+}
+
+void SparseMatrix::cleanup(Element* el) noexcept
+{
+    delete [] el;
+}
+
+void SparseMatrix::moveFrom(SparseMatrix& src) noexcept
+{
+    rows = src.rows;
+    columns = src.columns;
+    numberOfNotZeros = src.numberOfNotZeros;
+    arrayPointer = src.arrayPointer;
+    
+    src.rows = 0;
+    src.columns = 0;
+    src.numberOfNotZeros = 0;
+
 }
 
 
