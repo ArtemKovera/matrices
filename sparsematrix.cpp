@@ -61,8 +61,6 @@ private:
 
     Element* arrayPointer = nullptr;
 
-    void clear(Element*);
-
     //helper method which is used in + and - operator overloads
     int combinedNumberOfNotZeros(const SparseMatrix&, const SparseMatrix&) const; 
 
@@ -137,7 +135,7 @@ struct SparseMatrix::Element
     int value;
 };
 
-SparseMatrix::SparseMatrix(): rows{0}, columns{0}, numberOfNotZeros{0}, arrayPointer{nullptr} {}
+SparseMatrix::SparseMatrix(): rows{0}, columns{0}, numberOfNotZeros{0}, arrayPointer{nullptr}{}
 
 SparseMatrix::SparseMatrix(int rows, int columns, int elementNumber)
 {
@@ -148,8 +146,8 @@ SparseMatrix::SparseMatrix(int rows, int columns, int elementNumber)
     }
     this->rows = rows;
     this->columns = columns;
-    numberOfNotZeros = elementNumber;
-    arrayPointer = new Element [numberOfNotZeros];
+    numberOfNotZeros = elementNumber;  
+    arrayPointer = new Element [numberOfNotZeros];   
     int i, j;
     i = 0; 
     bool appropriateRecord;
@@ -484,8 +482,8 @@ void SparseMatrix::moveFrom(SparseMatrix& src) noexcept
     
     src.rows = 0;
     src.columns = 0;
-    src.numberOfNotZeros = 0;
-
+    src.numberOfNotZeros = 0; 
+    src.arrayPointer = nullptr;
 }
 
 
