@@ -29,6 +29,8 @@ public:
 
     SparseMatrix& operator=(SparseMatrix&&) noexcept;
 
+    ~SparseMatrix();
+
     //if the dimensions of the argument matrix differs from the caller matrix, 
     //the invalid_argument exception is thrown
     SparseMatrix operator+(const SparseMatrix&) const;
@@ -67,7 +69,7 @@ private:
     //helper method which is used in assignment operator
     void swap(SparseMatrix&, SparseMatrix&) noexcept;
 
-    void cleanup(Element*) noexcept;
+    void cleanup() noexcept;
 
     void moveFrom(SparseMatrix&) noexcept; 
 };
@@ -212,6 +214,11 @@ SparseMatrix::SparseMatrix(const SparseMatrix& src)
         arrayPointer[i] = src.arrayPointer[i];
 }
 
+SparseMatrix::~SparseMatrix()
+{
+    cleanup();
+}
+
 SparseMatrix& SparseMatrix::operator=(const SparseMatrix& src)
 {
     std::cout<<"Copy assignment operator is called"<<std::endl;
@@ -236,7 +243,7 @@ SparseMatrix& SparseMatrix::operator=(SparseMatrix&& src) noexcept
     if(this == &src)
         return *this;   
 
-    cleanup(arrayPointer);
+    cleanup();
 
     moveFrom(src);
     return *this;
@@ -460,9 +467,12 @@ void SparseMatrix::swap(SparseMatrix& first, SparseMatrix& second) noexcept
     swap(first.arrayPointer, second.arrayPointer);
 }
 
-void SparseMatrix::cleanup(Element* el) noexcept
+void SparseMatrix::cleanup() noexcept
 {
-    delete [] el;
+    if(arrayPointer)
+        delete [] arrayPointer;
+
+    arrayPointer = nullptr;
 }
 
 void SparseMatrix::moveFrom(SparseMatrix& src) noexcept
