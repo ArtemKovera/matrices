@@ -74,23 +74,45 @@ private:
 
 int main ()
 {
-    SparseMatrix sm1(10, 10, 4);
+    SparseMatrix sm1(10, 10, 5);
     std::cout << "Matrix sm1: \n";
     sm1.showMatrix();
     std::cout<<std::endl;
 
+    SparseMatrix sm2(sm1);
+    std::cout << "Matrix sm2: \n";
+    sm2.showMatrix();
+    std::cout<<std::endl; 
+
+    SparseMatrix sm3;
+    sm3 = sm2;
+    std::cout << "Matrix sm3: \n";
+    sm3.showMatrix();
+    std::cout<<std::endl;   
+
+    SparseMatrix sm4(10, 10, 5);
+    std::cout<<"sm4 is entered"<<std::endl;
+    std::cout << "Matrix sm4: \n";
+    sm3.showMatrix();
+    std::cout<<std::endl;       
+
+    SparseMatrix sm5 = sm4 - sm1;
+    std::cout << "Matrix sm5(sm4-sm1): \n";
+    sm5.showMatrix();
+    std::cout<<std::endl;          
+    /*
     SparseMatrix sm2(10, 10, 3);
     std::cout << "Matrix sm2: \n";
     sm2.showMatrix();
     std::cout<<std::endl;
      
-    /* 
+     
     SparseMatrix sm3 = sm1 + sm2;
     std::cout << "Matrix sm3: \n";
     sm3.showMatrix();
     std::cout <<"Number of elements in sm3: " << sm3.getNumberOfNotZeros() << std::endl;    
     std::cout << std::endl;
-    */
+    
     std::cout<<"////////////////////////////"<<std::endl;
     SparseMatrix sm4 = sm1 - sm2;
     std::cout<<"///////////////////////////"<<std::endl;
@@ -101,6 +123,7 @@ int main ()
     
     SparseMatrix sm5(std::move(sm4));
     sm1 = std::move(sm5);
+    */
     //SparseMatrix sm5 = sm4;
     /*  
     std::vector<std::tuple<int, int, int>> vec;
@@ -283,6 +306,7 @@ SparseMatrix SparseMatrix::operator-(const SparseMatrix& other) const
     result.rows = rows;
     result.columns = columns;
     int count = combinedNumberOfNotZeros(*this, other);
+
     int i, j, k, t;
 
     result.numberOfNotZeros = count;
@@ -291,6 +315,7 @@ SparseMatrix SparseMatrix::operator-(const SparseMatrix& other) const
     
     if(count == (numberOfNotZeros + other.numberOfNotZeros))
     {
+
         for(i = 0; i<numberOfNotZeros; i++)
         {
             result.arrayPointer[i] = arrayPointer[i];
@@ -310,42 +335,54 @@ SparseMatrix SparseMatrix::operator-(const SparseMatrix& other) const
 
     for(i=0; i<numberOfNotZeros; i++)
     {
-        match = false;
+        match = false;        
         for(j=0; j<other.numberOfNotZeros; j++)
         {
             if((arrayPointer[i].rowNumber == other.arrayPointer[j].rowNumber) &&
                (arrayPointer[i].columnNumber == other.arrayPointer[j].columnNumber))
             {
-                result.arrayPointer[i] = arrayPointer[i];
-                result.arrayPointer[i].value = arrayPointer[i].value - other.arrayPointer[i].value;
+                result.arrayPointer[i].rowNumber = arrayPointer[i].rowNumber;
+                result.arrayPointer[i].columnNumber = arrayPointer[i].columnNumber;
+                result.arrayPointer[i].value = arrayPointer[i].value - other.arrayPointer[j].value;
                 match = true;
                 break;
             }
 
         }
+   
         if(!match)
         {
-            result.arrayPointer[i] = arrayPointer[i];
+            result.arrayPointer[i].rowNumber = arrayPointer[i].rowNumber;
+            result.arrayPointer[i].columnNumber = arrayPointer[i].columnNumber;
             result.arrayPointer[i].value = arrayPointer[i].value;
         }
     }
-
-    t = numberOfNotZeros;
-    for(i = 0; i<numberOfNotZeros; i++)
+    
+    if(result.numberOfNotZeros > numberOfNotZeros)
     {
-        for(j = 0; j<other.numberOfNotZeros; j++)
+        t = numberOfNotZeros;
+        bool noMatch;
+        for(i = 0; i<other.numberOfNotZeros; i++)
         {
-            if((result.arrayPointer[i].rowNumber != other.arrayPointer[j].rowNumber) || 
-               (result.arrayPointer[i].columnNumber != other.arrayPointer[j].columnNumber))
+            noMatch = true;
+            for(j = 0; j<numberOfNotZeros; j++)
             {
-                result.arrayPointer[t] = other.arrayPointer[j];
-                result.arrayPointer[t].value = 0 - other.arrayPointer[j].value;
-                t++;
+                if((other.arrayPointer[i].rowNumber == result.arrayPointer[j].rowNumber) && 
+                (other.arrayPointer[i].columnNumber == result.arrayPointer[j].columnNumber))
+                {
+                    noMatch = false;
+                }
             }
-        }
-    } 
-
-    return result;
+            if(noMatch)
+            {   
+                result.arrayPointer[t] = other.arrayPointer[i];
+                result.arrayPointer[t].value = 0 - other.arrayPointer[i].value;
+                t++;
+            }  
+        } 
+        
+    }
+    return result;   
 }
 
 SparseMatrix SparseMatrix::operator+(const SparseMatrix& other) const
