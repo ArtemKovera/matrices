@@ -1,4 +1,5 @@
 //Sparse matrix representation with C++
+//This program shoul be compiled using C++17 standard or later
 
 #include<iostream>
 #include<stdexcept>
@@ -39,9 +40,11 @@ public:
     //the invalid_argument exception is thrown
     SparseMatrix operator-(const SparseMatrix&) const;
 
+    //this method returns the number of elements stored in sparse elements
+    //their values are actually stored, but they don't necessarily have to be not zeros  
     int getNumberOfNotZeros() const;
 
-    //this function prints the matrix to the console
+    //this method prints the matrix to the console
     //the time complexity of this function is O(n^3)
     void showMatrix() const;
 
@@ -74,7 +77,7 @@ private:
 
 int main ()
 {
-    SparseMatrix sm1(10, 10, 5);
+    SparseMatrix sm1(12, 20, 5);
     std::cout << "Matrix sm1: \n";
     sm1.showMatrix();
     std::cout<<std::endl;
@@ -90,7 +93,7 @@ int main ()
     sm3.showMatrix();
     std::cout<<std::endl;   
 
-    SparseMatrix sm4(10, 10, 5);
+    SparseMatrix sm4(12, 20, 5);
     std::cout<<"sm4 is entered"<<std::endl;
     std::cout << "Matrix sm4: \n";
     sm4.showMatrix();
@@ -101,7 +104,7 @@ int main ()
     sm5.showMatrix();
     std::cout<<std::endl;  
 
-    SparseMatrix sm6(10, 10, 4);
+    SparseMatrix sm6(12, 20, 4);
     std::cout<<"sm6 is entered"<<std::endl;
     std::cout << "Matrix sm6: \n";
     sm6.showMatrix();
@@ -110,8 +113,20 @@ int main ()
     SparseMatrix sm7 = sm5 + sm6;
     std::cout << "Matrix sm7(sm5+sm6): \n";
     sm7.showMatrix();
-    std::cout<<std::endl;                   
+    std::cout<<std::endl; 
+
+    std::cout<<"Elements of sm7(row number, column number, element value): "<<std::endl;
+    auto vec = sm7.getElements();
+    for(auto el : vec)
+        std::cout<<std::get<0>(el)<<" "<<std::get<1>(el)<<" "<<std::get<2>(el)<<"\n";                  
    
+    std::cout<<std::endl;
+    std::cout<<"There are "<<sm7.getTotalNumberOfElements()<<" elements in total in sm7"<<std::endl;
+    std::cout<<"But only "<<sm7.getNumberOfNotZeros()<<" are actually stored"<<std::endl;
+    
+    SparseMatrix sm8(std::move(sm7));
+    SparseMatrix sm9;
+    sm9 = std::move(sm8);
     return 0;
 }
 
@@ -189,7 +204,6 @@ SparseMatrix::SparseMatrix(int rows, int columns, int elementNumber)
 
 SparseMatrix::SparseMatrix(const SparseMatrix& src)
 {
-    std::cout<<"Copy constructor is called"<<std::endl;
     rows = src.rows;
     columns = src.columns;
     numberOfNotZeros = src.numberOfNotZeros;
@@ -206,7 +220,6 @@ SparseMatrix::~SparseMatrix()
 
 SparseMatrix& SparseMatrix::operator=(const SparseMatrix& src)
 {
-    std::cout<<"Copy assignment operator is called"<<std::endl;
     if(this == &src)
         return *this;
     
@@ -218,13 +231,11 @@ SparseMatrix& SparseMatrix::operator=(const SparseMatrix& src)
 
 SparseMatrix::SparseMatrix(SparseMatrix&& src) noexcept
 {
-    std::cout<<"Move constructor"<<std::endl;
     moveFrom(src);
 }
 
 SparseMatrix& SparseMatrix::operator=(SparseMatrix&& src) noexcept
 {
-    std::cout<<"Move assignment operator is called"<<std::endl;
     if(this == &src)
         return *this;   
 
@@ -497,6 +508,20 @@ void SparseMatrix::moveFrom(SparseMatrix& src) noexcept
     src.arrayPointer = nullptr;
 }
 
+int SparseMatrix::getRows() const
+{
+    return rows;
+}
+
+int SparseMatrix::getColumns() const
+{
+    return columns;
+}
+
+int SparseMatrix::getTotalNumberOfElements() const
+{
+    return rows * columns;
+}
 
 
 
