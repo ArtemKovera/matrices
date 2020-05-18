@@ -20,7 +20,7 @@ public:
     SparseMatrix(int, int, int);
 
     //default constructot sets number of rows, number of columns, and number of not zero elements to zero
-    SparseMatrix();
+    //SparseMatrix();
 
     SparseMatrix(const SparseMatrix&);
 
@@ -64,6 +64,9 @@ private:
 
     Element* arrayPointer = nullptr;
 
+    //default constructot sets number of rows, number of columns, and number of not zero elements to zero
+    SparseMatrix();
+
     //helper method which is used in + and - operator overloads
     int combinedNumberOfNotZeros(const SparseMatrix&, const SparseMatrix&) const; 
 
@@ -87,7 +90,7 @@ int main ()
     sm2.showMatrix();
     std::cout<<std::endl; 
 
-    SparseMatrix sm3;
+    SparseMatrix sm3(2, 2, 1);
     sm3 = sm2;
     std::cout << "Matrix sm3: \n";
     sm3.showMatrix();
@@ -125,7 +128,7 @@ int main ()
     std::cout<<"But only "<<sm7.getNumberOfNotZeros()<<" are actually stored"<<std::endl;
     
     SparseMatrix sm8(std::move(sm7));
-    SparseMatrix sm9;
+    SparseMatrix sm9(2, 2, 1);
     sm9 = std::move(sm8);
     return 0;
 }
