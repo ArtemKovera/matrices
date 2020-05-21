@@ -1,5 +1,5 @@
 //Sparse matrix representation with C++
-//This program shoul be compiled using C++17 standard or later
+//This program should be compiled using C++17 standard or later
 
 #include<iostream>
 #include<stdexcept>
@@ -7,7 +7,7 @@
 #include<vector>
 #include<tuple>
 #include<utility>
-
+#include<fstream>
 
 //this class uses so-calles three column sparse matrix representation 
 //this way of sparse matrix representation allows saving space
@@ -18,9 +18,6 @@ public:
     //the constructor takes 3 arguments: number of rows, number of columns, and number of not zero elements 
     //if the third argument is greater than the product of the two other arguments, the program terminates
     SparseMatrix(int, int, int);
-
-    //default constructot sets number of rows, number of columns, and number of not zero elements to zero
-    //SparseMatrix();
 
     SparseMatrix(const SparseMatrix&);
 
@@ -56,6 +53,10 @@ public:
 
     std::vector<std::tuple<int, int, int>> getElements () const;
 
+    //this method saves matrix to a file
+    //the name of the file, this method takes as a parameter
+    void saveToDisk(const char*) const; 
+
 private:
     struct Element;
     int rows;
@@ -85,11 +86,11 @@ int main ()
     sm1.showMatrix();
     std::cout<<std::endl;
 
+    //checking copy constructor and assignment operator
     SparseMatrix sm2(sm1);
     std::cout << "Matrix sm2: \n";
     sm2.showMatrix();
     std::cout<<std::endl; 
-
     SparseMatrix sm3(2, 2, 1);
     sm3 = sm2;
     std::cout << "Matrix sm3: \n";
@@ -126,10 +127,15 @@ int main ()
     std::cout<<std::endl;
     std::cout<<"There are "<<sm7.getTotalNumberOfElements()<<" elements in total in sm7"<<std::endl;
     std::cout<<"But only "<<sm7.getNumberOfNotZeros()<<" are actually stored"<<std::endl;
+    std::cout<<std::endl;
     
+    //checking move constructor and assignment operator
     SparseMatrix sm8(std::move(sm7));
     SparseMatrix sm9(2, 2, 1);
     sm9 = std::move(sm8);
+
+    //checking saveToDisk method
+    sm6.saveToDisk("file");
     return 0;
 }
 
@@ -524,6 +530,45 @@ int SparseMatrix::getColumns() const
 int SparseMatrix::getTotalNumberOfElements() const
 {
     return rows * columns;
+}
+
+void SparseMatrix::saveToDisk(const char* fileName) const
+{
+    std::ofstream outFile(fileName);
+    if (!outFile.good()) 
+    {
+        std::cerr << "Error while opening output file!" << std::endl;
+        exit(1);
+    }    
+    
+    outFile << "This matrix has " << getRows() << " rows " <<
+    "and " << getColumns() << " columns " << std::endl << std::endl; 
+    
+    int i, j, k;
+    bool flag;
+    for(i=0; i<rows; i++)
+    {
+        for(j=0; j<columns; j++)
+        {
+            flag = true;
+            k = 0;
+            while( k != numberOfNotZeros)
+            {
+                if(arrayPointer[k].rowNumber == i && arrayPointer[k].columnNumber == j)
+                {
+                    outFile << arrayPointer[k].value << " ";
+                    flag = false;
+                    break;
+                }
+                k++;
+            }
+            if(flag) 
+                outFile << "0 ";
+        }
+
+        outFile << std::endl;
+    }
+
 }
 
 
