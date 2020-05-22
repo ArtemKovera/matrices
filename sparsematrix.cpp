@@ -8,6 +8,7 @@
 #include<tuple>
 #include<utility>
 #include<fstream>
+#include<string_view>
 
 //this class uses so-calles three column sparse matrix representation 
 //this way of sparse matrix representation allows saving space
@@ -55,7 +56,7 @@ public:
 
     //this method saves matrix to a file
     //the name of the file, this method takes as a parameter
-    void saveToDisk(const char*) const; 
+    void saveToDisk(std::string_view) const; 
 
 private:
     struct Element;
@@ -135,7 +136,7 @@ int main ()
     sm9 = std::move(sm8);
 
     //checking saveToDisk method
-    sm6.saveToDisk("file");
+    sm6.saveToDisk("file.txt");
     return 0;
 }
 
@@ -532,9 +533,9 @@ int SparseMatrix::getTotalNumberOfElements() const
     return rows * columns;
 }
 
-void SparseMatrix::saveToDisk(const char* fileName) const
+void SparseMatrix::saveToDisk(std::string_view fileName) const
 {
-    std::ofstream outFile(fileName);
+    std::ofstream outFile(fileName.data());
     if (!outFile.good()) 
     {
         std::cerr << "Error while opening output file!" << std::endl;
@@ -543,9 +544,15 @@ void SparseMatrix::saveToDisk(const char* fileName) const
     
     outFile << "This matrix has " << getRows() << " rows " <<
     "and " << getColumns() << " columns " << std::endl << std::endl; 
+    if(outFile.fail())
+    {
+        std::cerr << "Unable to write to a file" << std::endl;
+        exit(1);                        
+    }
     
     int i, j, k;
     bool flag;
+
     for(i=0; i<rows; i++)
     {
         for(j=0; j<columns; j++)
@@ -557,16 +564,34 @@ void SparseMatrix::saveToDisk(const char* fileName) const
                 if(arrayPointer[k].rowNumber == i && arrayPointer[k].columnNumber == j)
                 {
                     outFile << arrayPointer[k].value << " ";
+                    if(outFile.fail())
+                    {
+                        std::cerr << "Unable to write to a file" << std::endl;
+                        exit(1);                        
+                    }
                     flag = false;
                     break;
                 }
                 k++;
             }
-            if(flag) 
+            if(flag)
+            {
                 outFile << "0 ";
+                if(outFile.fail())
+                {
+                    std::cerr << "Unable to write to a file" << std::endl;
+                    exit(1);                        
+                }
+            } 
+                
         }
 
         outFile << std::endl;
+        if(outFile.fail())
+        {
+            std::cerr << "Unable to write to a file" << std::endl;
+            exit(1);                        
+        }
     }
 
 }
