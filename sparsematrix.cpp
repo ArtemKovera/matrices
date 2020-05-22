@@ -544,9 +544,9 @@ void SparseMatrix::saveToDisk(std::string_view fileName) const
     
     outFile << "This matrix has " << getRows() << " rows " <<
     "and " << getColumns() << " columns " << std::endl << std::endl; 
-    if(outFile.fail())
+    if(!outFile.good())
     {
-        std::cerr << "Unable to write to a file" << std::endl;
+        std::cerr << "Unable to write to the file" << std::endl;
         exit(1);                        
     }
     
@@ -566,7 +566,7 @@ void SparseMatrix::saveToDisk(std::string_view fileName) const
                     outFile << arrayPointer[k].value << " ";
                     if(outFile.fail())
                     {
-                        std::cerr << "Unable to write to a file" << std::endl;
+                        std::cerr << "Unable to write to the file" << std::endl;
                         exit(1);                        
                     }
                     flag = false;
@@ -579,7 +579,7 @@ void SparseMatrix::saveToDisk(std::string_view fileName) const
                 outFile << "0 ";
                 if(outFile.fail())
                 {
-                    std::cerr << "Unable to write to a file" << std::endl;
+                    std::cerr << "Unable to write to the file" << std::endl;
                     exit(1);                        
                 }
             } 
@@ -589,7 +589,7 @@ void SparseMatrix::saveToDisk(std::string_view fileName) const
         outFile << std::endl;
         if(outFile.fail())
         {
-            std::cerr << "Unable to write to a file" << std::endl;
+            std::cerr << "Unable to write to the file" << std::endl;
             exit(1);                        
         }
     }
